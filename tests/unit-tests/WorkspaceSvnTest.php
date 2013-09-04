@@ -229,30 +229,29 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 			->method('execute')
 			->with("svn info --xml ~/test  2>&1")
 			->will($this->returnValue(true));
-		$infoStr = <<<EOD
-<?xml version="1.0"?>
-<info>
-	<entry
-	   kind="dir"
-	   path="."
-	   revision="1">
-		<url>http://svn.example.com/vcbot/branches/ticket_1234</url>
-		<repository>
-			<root>http://svn.example.com/vcbot</root>
-			<uuid>5e7d134a-54fb-0310-bd04-b611643e5c25</uuid>
-		</repository>
-		<wc-info>
-			<schedule>normal</schedule>
-			<depth>infinity</depth>
-		</wc-info>
-		<commit
-	   		revision="1">
-			<author>sally</author>
-			<date>2003-01-15T23:35:12.847647Z</date>
-		</commit>
-	</entry>
-</info>
-EOD;
+		$infoStr = array('<?xml version="1.0"?>'
+			, '<info>'
+			, '<entry'
+	  		, ' kind="dir"'
+	   		, ' path="."'
+	 		, ' revision="1">'
+				, '<url>http://svn.example.com/vcbot/branches/ticket_1234</url>'
+				, '<repository>'
+					, '<root>http://svn.example.com/vcbot</root>'
+					, '<uuid>5e7d134a-54fb-0310-bd04-b611643e5c25</uuid>'
+				, '</repository>'
+				, '<wc-info>'
+					, '<schedule>normal</schedule>'
+					, '<depth>infinity</depth>'
+				, '</wc-info>'
+				, '<commit'
+	   			, '	revision="1">'
+					, '	<author>sally</author>'
+					, '	<date>2003-01-15T23:35:12.847647Z</date>'
+				, '</commit>'
+			, '</entry>'
+			, '</info>');
+				
 		// Return Xml
 		$client->expects($this->at(1))
 			->method('getLastResponse')
@@ -277,7 +276,7 @@ EOD;
 			->will($this->returnValue(true));
 		$client->expects($this->at(1))
 			->method('execute')
-			->with("svn commit -m 'merged branches/ticket_1234 into releases/Sep0113'")
+			->with("svn commit -m 'merged branches/ticket_1234 into releases/Sep0113' ~/test  2>&1")
 			->will($this->returnValue(true));
 	
 		$log = $this->getMock('MessageLog', array('write'));
@@ -376,6 +375,18 @@ EOD;
 		$ws = new WorkspaceSvn('http://svn.example.com/vcbot', '~/test', $log, $client);
 	
 		$ws->moveRelease('Sep0113', 'Sep0113A');
+	}
+	
+	public function test_detectConflict(){
+		$client = $this->getMock('CommandClient');
+		$log = $this->getMock('MessageLog');
+		$ws = new WorkspaceSvn('http://svn.example.com/vcbot', '~/test', $log, $client);
+		
+		$notConflicted = array('hi', 'world');
+		$conflicted = array('hello', 'Summary of conflicts:');
+		
+		$this->assertFalse($ws->detectConflict($notConflicted));
+		$this->assertTrue($ws->detectConflict($conflicted));
 	}
 	
 }

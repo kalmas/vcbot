@@ -4,6 +4,7 @@ class MessageLog{
 	const NORMAL = 0;
 	const COMMAND = 1;
 	const RESPONSE = 2;
+	const IMPORTANT = 3;
 	
 	/**
 	 * Write this message

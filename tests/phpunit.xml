@@ -4,9 +4,17 @@
 		<testsuite name="Unit Tests">
 			<directory>./unit-tests</directory>
 		</testsuite>
+		<!-- 
+			These integration tests assume that you have a working svn workspace
+			checked out to ~/frc_push
+			Running them all will cause a lot of svn commands to run and a lot of
+			revisions to happen
+			Use with care
+		 
 		<testsuite name="Integration Tests">
 			<directory>./integration-tests</directory>
 		</testsuite>
+		-->
 	</testsuites>
 
 </phpunit>

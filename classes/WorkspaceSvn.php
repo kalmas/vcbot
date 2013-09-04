@@ -138,14 +138,40 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 		return false;	
 	}
 	
+	/**
+	 * Determine if there are conflicts listed in the result message
+	 * @param array $resultArray
+	 * @return boolean
+	 */
+	public function detectConflict($resultArray){
+		foreach($resultArray as $line){
+			if(strstr($line, 'Summary of conflicts:')){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Merge branch into workspace and commit
+	 * @param string $path
+	 * @return boolean
+	 */
 	private function mergeBranch($path){
 		$this->messageLog->write("Merging {$path} into {$this->directoryPath}");
 		$cmd = "svn merge {$this->url}/{$path} {$this->directoryPath} {$this->cmdAppend}";
-		if($this->commandClient->execute($cmd)){
-			$cmd = "svn commit -m 'merged {$path} into {$this->currentBranch}'";
+		if(!$this->commandClient->execute($cmd)){ // If merge failed, stop here
+			return false;
+		}
+		
+		if($this->detectConflict($this->commandClient->getLastResponse())){
+			$this->messageLog->write('Conflict encountered, please resolve.', MessageLog::IMPORTANT);
+			return false;
+		} else {
+			// Commit merge
+			$cmd = "svn commit -m 'merged {$path} into {$this->currentBranch}' {$this->directoryPath} {$this->cmdAppend}";
 			return $this->commandClient->execute($cmd);
 		}
-		return false;
 	}
 	
 	/* (non-PHPdoc)
@@ -169,15 +195,11 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 	 */
 	public function getCurrentBranch(){
 		if(is_null($this->currentBranch)){
-			$cmd = "svn info --xml {$this->directoryPath} {$this->cmdAppend}";
-			$success = $this->commandClient->execute($cmd);
-			if($success){
-				$infoXml = $this->commandClient->getLastResponse();
-				$info = new SimpleXMLElement($infoXml);
-				$url = (string) $info->entry->url;
-				$branch = str_replace($this->url . '/', '', $url);
-				$this->currentBranch = $branch;
-			}
+			$infoXml = $this->getWorkspaceInfo();
+			$info = new SimpleXMLElement($infoXml);
+			$url = (string) $info->entry->url;
+			$branch = str_replace($this->url . '/', '', $url);
+			$this->currentBranch = $branch;
 		}
 		return $this->currentBranch;
 	}
@@ -227,6 +249,25 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 		$path = $this->getReleasePath($releaseName);
 		$newPath = $this->getReleasePath($newReleaseName);
 		return $this->moveBranch($path, $newPath);
+	}
+	
+	/**
+	 * Return svn info xml
+	 * @return string
+	 */
+	public function getWorkspaceInfo(){
+		$cmd = "svn info --xml {$this->directoryPath} {$this->cmdAppend}";
+		$success = $this->commandClient->execute($cmd);
+		if($success){
+			$response = $this->commandClient->getLastResponse();
+			$string = '';
+			foreach($response as $line){
+				$string .= $line . "\n";
+			}
+			
+			return $string;
+		}
+		return '';
 	}
 
 }
