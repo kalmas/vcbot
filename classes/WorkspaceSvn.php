@@ -153,22 +153,45 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 	}
 	
 	/**
-	 * Merge branch into workspace and commit
+	 * Merge branch into workspace and commit merge
+	 * Return true if merge was without conflict and was
+	 * succesfully commited. False otherwise.
+	 * 
+	 * If dry is true no change will be made to workspace if 
+	 * conflicts are detected.
+	 * If dry is false any conflicts will be left unresolved 
+	 * in workspace for manual resolution
 	 * @param string $path
+	 * @param boolean $dry
 	 * @return boolean
 	 */
-	private function mergeBranch($path){
+	private function mergeBranch($path, $dry = true){
 		$this->messageLog->write("Merging {$path} into {$this->directoryPath}");
-		$cmd = "svn merge {$this->url}/{$path} {$this->directoryPath} {$this->cmdAppend}";
+		
+		if($dry){
+			// See if we are going to hit any conflicts before we do a real merge
+			// Stop if we find any
+			$cmd = "svn merge --dry-run {$this->url}/{$path} {$this->directoryPath} {$this->cmdAppend}";
+			if(!$this->commandClient->execute($cmd)){ // If merge failed, stop here
+				return false;
+			}
+			if($this->detectConflict($this->commandClient->getLastResponse())){
+				$this->messageLog->write('Conflict detected. Merge aborted.', MessageLog::IMPORTANT);
+				return false;
+			}
+		}
+		
+		// Perform merge and postpone any conlicts
+		$cmd = "svn merge --accept 'postpone' {$this->url}/{$path} {$this->directoryPath} {$this->cmdAppend}";
 		if(!$this->commandClient->execute($cmd)){ // If merge failed, stop here
 			return false;
 		}
 		
 		if($this->detectConflict($this->commandClient->getLastResponse())){
-			$this->messageLog->write('Conflict encountered, please resolve.', MessageLog::IMPORTANT);
+			$this->messageLog->write('Conflict encountered during merge, please resolve workspace manually.', MessageLog::IMPORTANT);
 			return false;
 		} else {
-			// Commit merge
+			// Finally, commit the merge
 			$cmd = "svn commit -m 'merged {$path} into {$this->currentBranch}' {$this->directoryPath} {$this->cmdAppend}";
 			return $this->commandClient->execute($cmd);
 		}
@@ -177,17 +200,17 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 	/* (non-PHPdoc)
 	 * @see IRepositoryRepo::mergeTicket()
 	 */
-	public function mergeTicket($ticketName){
+	public function mergeTicket($ticketName, $dry = true){
 		$path = $this->getTicketPath($ticketName);
-		return $this->mergeBranch($path);
+		return $this->mergeBranch($path, $dry);
 	}
 	
 	/* (non-PHPdoc)
 	 * @see IRepositoryRepo::mergeRelease()
 	 */
-	public function mergeRelease($releaseName){
+	public function mergeRelease($releaseName, $dry = true){
 		$path = $this->getReleasePath($releaseName);
-		return $this->mergeBranch($path);
+		return $this->mergeBranch($path, $dry);
 	}
 	
 	/* (non-PHPdoc)

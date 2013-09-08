@@ -53,14 +53,16 @@ interface IRepositoryRepo {
 	public function switchToRelease($releaseName);
 	/**
 	 * @param string
+	 * @param boolean
 	 * @return boolean
 	 */
-	public function mergeTicket($ticketName);
+	public function mergeTicket($ticketName, $dry = true);
 	/**
 	 * @param string
+	 * @param boolean
 	 * @return boolean
 	 */
-	public function mergeRelease($releaseName);
+	public function mergeRelease($releaseName, $dry = true);
 	/**
 	 * @return string 
 	 */
