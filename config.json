@@ -1,0 +1,19 @@
+{
+    "workspaces": [
+        {
+            "name": "frc",
+            "directoryPath": "~/frc_push",
+            "url": "http://svn.frlabs.com/svn/frc"
+        },
+        {
+            "name": "frms",
+            "directoryPath": "~/frms_push",
+            "url": "http://svn.frlabs.com/svn/frms"
+        },
+        {
+            "name": "chc",
+            "directoryPath": "~/chc_push",
+            "url": "http://svn.frlabs.com/svn/frms/chc"
+        }
+    ]
+}
