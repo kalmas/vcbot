@@ -12,6 +12,7 @@ switch($argv[1]){
 	case 'createbranch':
 		$wsName = strtolower($argv[2]);
 		$ticketName = $argv[3];
+		
 		try{
 			$bot->getWorkspace($wsName)->createTicket($ticketName);
 		}catch(Exception $e){
@@ -24,6 +25,7 @@ switch($argv[1]){
 	case 'createrelease':
 		$wsName = strtolower($argv[2]);
 		$releaseName = $argv[3];
+		
 		try{
 			$bot->getWorkspace($wsName)->createRelease($releaseName);
 		}catch(Exception $e){
@@ -32,17 +34,20 @@ switch($argv[1]){
 		break;
 	// mergeup ticket_1234 Sep0813
 	case 'mergeup':
+	case 'mup':
 		$ticket = $argv[2];
 		$release = $argv[3];
-		$workspaces = array();
+		$workspace = null;
 		if(isset($argv[4])){
-			$workspaces[] = strtolower($argv[4]);
-		}else{
-			$workspaces = $bot->getWorkspaceNames();
+			$workspace = strtolower($argv[4]);
 		}
-
-		// merge each
-	
+		
+		try{
+			$bot->mergeUp($ticket, $release, $workspace);
+		}catch(Exception $e){
+			die($e->getMessage());
+		}
+		break;
 }
 
 
