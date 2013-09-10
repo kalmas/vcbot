@@ -101,7 +101,7 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals('releases/vcbot_testRelease', $branch);
 	}
 	
-	public function test_mergeTicket(){
+	public function test_mergeTicket_no_conflict(){
 		$ws = $this->ws;
 		
 		// Go to first ticket
@@ -128,7 +128,7 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue($this->client->execute('ls ~/frc_push/vcbottest'));
 	}
 	
-	public function test_mergeTicket_conflicted(){
+	public function test_mergeTicket_tree_conflict(){
 		$ws = $this->ws;
 		
 		// Go to first ticket
