@@ -113,7 +113,7 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 		// Make a test file and commit it
 		$this->client->execute('touch ~/frc_push/vcbottest');
 		$this->client->execute('svn add ~/frc_push/vcbottest');
-		$this->client->execute('svn commit -m "testing: made a new file" ~/frc_push');
+		$this->client->execute('svn commit -m "automated testing: made a new file" ~/frc_push');
 		
 		// Go to second ticket
 		$ws->switchToTicket('vcbot_testTicket');
@@ -140,7 +140,7 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 		// Make a test file and commit it
 		$this->client->execute('touch ~/frc_push/vcbottest');
 		$this->client->execute('svn add ~/frc_push/vcbottest');
-		$this->client->execute('svn commit -m "testing: made a new file" ~/frc_push');
+		$this->client->execute('svn commit -m "automated testing: made a new file" ~/frc_push');
 		
 		// Go to second ticket
 		$ws->switchToTicket('vcbot_testTicket');
@@ -151,13 +151,48 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 		// Make a test file agian and commit it
 		$this->client->execute('touch ~/frc_push/vcbottest');
 		$this->client->execute('svn add ~/frc_push/vcbottest');
-		$this->client->execute('svn commit -m "testing: made a new file agian" ~/frc_push');
+		$this->client->execute('svn commit -m "automated testing: made a new file agian" ~/frc_push');
 		
 		// Obligatory update
 		$this->client->execute('svn up ~/frc_push');
 		
 		// Merge first ticket into second, should fail on conflict
 		$this->assertFalse($ws->mergeTicket('vcbot_testTicket_merge'));
+	}
+	
+	public function test_mergeTicket_text_conflict(){
+		$ws = $this->ws;
+		
+		// Go to first ticket
+		$ws->switchToTicket('vcbot_testTicket_merge');
+		
+		// Make a test file and commit it
+		$this->client->execute('touch ~/frc_push/vcbottest');
+		$this->client->execute('svn add ~/frc_push/vcbottest');
+		$this->client->execute('svn commit -m "automated testing: made a new file" ~/frc_push');
+		
+		// Go to second ticket
+		$ws->switchToTicket('vcbot_testTicket');
+		
+		// Merge first ticket into second
+		$this->assertTrue($ws->mergeTicket('vcbot_testTicket_merge'));
+		
+		// Now, change the file and commit that
+		$this->client->execute('echo "the file should say this" > ~/frc_push/vcbottest');
+		$this->client->execute('svn commit -m "automated testing: modified file" ~/frc_push');
+		
+		// Switch back to first ticket
+		$ws->switchToTicket('vcbot_testTicket_merge');
+		
+		// Change the file agian here and commit (tired yet?)
+		$this->client->execute('echo "no, the file shouldnt say that" > ~/frc_push/vcbottest');
+		$this->client->execute('svn commit -m "automated testing: modified file once more" ~/frc_push');
+		
+		// Obligatory update
+		$this->client->execute('svn up ~/frc_push');
+		
+		// Merge second ticket into the first, should fail on conflict
+		$this->assertFalse($ws->mergeTicket('vcbot_testTicket'));
 	}
 	
 	

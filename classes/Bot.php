@@ -61,7 +61,7 @@ class Bot{
 	 */
 	public function mergeUp($ticket, $release, $workspaceName = null){
 		// Decide if we are working on one specific workspace, or all of them
-		if(!is_null($workspace)){
+		if(!is_null($workspaceName)){
 			$workspaceNames = array();
 			$workspaceNames[] = $workspaceName;
 		} else {
@@ -81,7 +81,7 @@ class Bot{
 				throw new Exception("Couldn't switch {$name} workspace to release {$release}.");
 			}
 			// Preform merge
-			$ws->mergeTicket($ticketName);
+			$ws->mergeTicket($ticket);
 		}
 	}
 	
