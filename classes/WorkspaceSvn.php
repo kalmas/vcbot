@@ -12,8 +12,15 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 	 * @param CommandClient $commandClient
 	 * @param boolean $verbose
 	 */
-	public function __construct($url, $directoryPath, $messageLog, $commandClient, $verbose = false){
+	public function __construct($url, $directoryPath, $messageLog, $commandClient, $verbose = false, $ticketBase = null, $releaseBase = null){
 		parent::__construct($url, $directoryPath, $messageLog, $commandClient, self::TYPE, $verbose);
+		if(isset($ticketBase)){
+			$this->ticketBase = $ticketBase;
+		}
+		if(isset($releaseBase)){
+			$this->releaseBase = $releaseBase;
+		}
+		
 		if(!$this->verbose){
 			$this->cmdAppend = ' 2>&1';
 		}
@@ -79,11 +86,11 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 	 */
 	private function copyBranch($path, $basePath = 'trunk'){
 		if($this->pathExists($path)){
-			$this->messageLog->write("Can't create {$path}, branch already exists");
+			$this->messageLog->write("Can't create {$path}, branch already exists", MessageLog::IMPORTANT);
 			return false;
 		}
 		if(!$this->pathExists($basePath)){
-			$this->messageLog->write("Cannot copy from {$basePath}, branch dosen't exists");
+			$this->messageLog->write("Cannot copy from {$basePath}, branch dosen't exists", MessageLog::IMPORTANT);
 			return false;
 		}
 		$this->messageLog->write("Creating {$path} from {$basePath}");

@@ -13,7 +13,8 @@
         {
             "name": "chc",
             "directoryPath": "~/chc_push",
-            "url": "http://svn.frlabs.com/svn/frms/chc"
+            "url": "http://svn.frlabs.com/svn/frms/chc",
+            "ticketBase": "branches/core"
         }
     ]
 }

@@ -4,14 +4,24 @@ class Bot{
 	
 	private $workspaces = array();
 	
+	/**
+	 * @param string $config
+	 */
 	public function __construct($config = null){
 		$configObj = json_decode($config);
 		
 		$messageLog = new MessageLog();
-		$commandClient = new CommandClient();		
+		$commandClient = new CommandClient($messageLog);		
 		
 		foreach($configObj->workspaces as $wsConfig){
-			$workspace = new WorkspaceSvn($wsConfig->url, $wsConfig->directoryPath, $messageLog, $commandClient);
+			$workspace = new WorkspaceSvn($wsConfig->url
+					, $wsConfig->directoryPath
+					, $messageLog
+					, $commandClient
+					, false
+					, $wsConfig->ticketBase
+					, $wsConfig->releaseBase
+				);
 			$this->registerWorkspace(strtolower($wsConfig->name), $workspace);
 		}
 	}
