@@ -1,7 +1,7 @@
 <?php 
 require_once 'bootstrap.php';
 
-$config = file_get_contents('./config.json');
+$config = file_get_contents(dirname(__FILE__) . '/config.json');
 
 $bot = new Bot($config);
 

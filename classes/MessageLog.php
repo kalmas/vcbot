@@ -12,7 +12,7 @@ class MessageLog{
 	const PP_CLEAR = "\e[0m";
 	const PP_FILL_LINE = "\e[2K";
 	const PP_BG_YELLOW = "\e[43m";
-	const PP_GREY = "\e[1;30m";
+	const PP_GREY = "\e[37m";
 	const PP_BOLD_RED = "\e[1;31m";
 
 	/**
