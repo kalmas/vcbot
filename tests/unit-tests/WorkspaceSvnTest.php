@@ -276,14 +276,14 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 			->will($this->returnValue(true));
 		$client->expects($this->at(1))
 			->method('getLastResponse')
-			->will($this->returnValue(array()));
+			->will($this->returnValue(array("--- Merging r43640 through r43770 into 'chc_push':", "U    chc_push/relocation.asp")));
 		$client->expects($this->at(2))
 			->method('execute')
 			->with("svn merge --accept 'postpone' http://svn.example.com/vcbot/branches/ticket_1234 ~/test  2>&1")
 			->will($this->returnValue(true));
 		$client->expects($this->at(3))
 			->method('getLastResponse')
-			->will($this->returnValue(array()));
+			->will($this->returnValue(array("--- Merging r43640 through r43770 into 'chc_push':", "U    chc_push/relocation.asp")));
 		$client->expects($this->at(4))
 			->method('execute')
 			->with("svn commit -m 'merged branches/ticket_1234 into releases/Sep0113' ~/test  2>&1")
@@ -294,7 +294,7 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 		$ws = new WorkspaceSvn('http://svn.example.com/vcbot', '~/test', $log, $client);
 		$ws->setCurrentBranch('releases/Sep0113');
 	
-		$ws->mergeTicket('ticket_1234');
+		$this->assertTrue($ws->mergeTicket('ticket_1234'));
 	}
 	
 	public function test_mergeTicket_issues_correct_command_for_not_dry(){
@@ -307,7 +307,7 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 			->will($this->returnValue(true));
 		$client->expects($this->at(1))
 			->method('getLastResponse')
-			->will($this->returnValue(array()));
+			->will($this->returnValue(array("--- Merging r43640 through r43770 into 'chc_push':", "U    chc_push/relocation.asp")));
 		$client->expects($this->at(2))
 			->method('execute')
 			->with("svn commit -m 'merged branches/ticket_1234 into releases/Sep0113' ~/test  2>&1")
@@ -318,7 +318,27 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 		$ws = new WorkspaceSvn('http://svn.example.com/vcbot', '~/test', $log, $client);
 		$ws->setCurrentBranch('releases/Sep0113');
 	
-		$ws->mergeTicket('ticket_1234', false);
+		$this->assertTrue($ws->mergeTicket('ticket_1234', false));
+	}
+	
+	public function test_mergeTicket_stops_if_no_changes_found(){
+		$client = $this->getMock('CommandClient', array('execute', 'getLastResponse'));
+	
+		// Merge
+		$client->expects($this->at(0))
+			->method('execute')
+			->with("svn merge --dry-run http://svn.example.com/vcbot/branches/ticket_1234 ~/test  2>&1")
+			->will($this->returnValue(true));
+		$client->expects($this->at(1))
+			->method('getLastResponse')
+			->will($this->returnValue(array()));
+			
+		$log = $this->getMock('MessageLog', array('write'));
+	
+		$ws = new WorkspaceSvn('http://svn.example.com/vcbot', '~/test', $log, $client);
+		$ws->setCurrentBranch('releases/Sep0113');
+	
+		$this->assertFalse($ws->mergeTicket('ticket_1234'));
 	}
 	
 	public function test_deleteTicket_issues_correct_command(){
