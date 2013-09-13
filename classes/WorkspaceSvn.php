@@ -182,7 +182,11 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 			if(!$this->commandClient->execute($cmd)){ // If merge failed, stop here
 				return false;
 			}
-			if($this->detectConflict($this->commandClient->getLastResponse())){
+			$response = $this->commandClient->getLastResponse();
+			if(empty($response)){
+				$this->messageLog->write("No changes to be merged from {$path}.", MessageLog::IMPORTANT);
+				return false;
+			} else if($this->detectConflict($response)){
 				$this->messageLog->write('Conflict detected. Merge aborted.', MessageLog::IMPORTANT);
 				return false;
 			}
@@ -193,7 +197,6 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 		if(!$this->commandClient->execute($cmd)){ // If merge failed, stop here
 			return false;
 		}
-		
 		if($this->detectConflict($this->commandClient->getLastResponse())){
 			$this->messageLog->write('Conflict encountered during merge, please resolve workspace manually.', MessageLog::IMPORTANT);
 			return false;

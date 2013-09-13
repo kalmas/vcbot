@@ -8,8 +8,10 @@ $bot = new Bot($config);
 switch($argv[1]){
 	// makeTicket frms ticket_1234
 	case 'makeTicket':
+	case 'maketicket':
 	case 'mt':
 	case 'createbranch':
+	case 'cb':
 		$wsName = strtolower($argv[2]);
 		$ticketName = $argv[3];
 		
@@ -21,8 +23,10 @@ switch($argv[1]){
 		break;
 	// makeRelease frms Sep0813
 	case 'makeRelease':
+	case 'makerelease':
 	case 'mr':
 	case 'createrelease':
+	case 'cr':
 		$wsName = strtolower($argv[2]);
 		$releaseName = $argv[3];
 		
@@ -32,7 +36,8 @@ switch($argv[1]){
 			die($e->getMessage());
 		}
 		break;
-	// mergeup ticket_1234 Sep0813
+	// mergeUp ticket_1234 Sep0813
+	case 'mergeUp':
 	case 'mergeup':
 	case 'mup':
 		$ticket = $argv[2];
