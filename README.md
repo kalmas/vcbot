@@ -12,6 +12,16 @@ Just a php script to help with version control busywork.
 	# Make a release branch from trunk
 	vcbot makeRelease frc Sep1313
 *aliases: mr, makerelease, createrelease, cr*
+###deleteTicket
+	# vcbot deleteTicket <repo> <ticket>
+	# Delete a ticket branch
+	vcbot deleteTicket frc ticket_1234
+*aliases: dt, deleteticket, deletebranch, db*
+###deleteRelease
+	# vcbot deleteRelease <repo> <release>
+	# Delete a release branch
+	vcbot deleteRelease frc Sep1313
+*aliases: dr, deleterelease*
 ###mergeUp
 	# vcbot mergeUp <ticket> <release> [<repo>]
 	# Merge ticket branch into release branch (for all registered workspaces)
@@ -57,8 +67,9 @@ Just a php script to help with version control busywork.
 - [x] create ticket
 - [x] create release
 - [x] merge up
-- [ ] delete ticket
-- [ ] delete release
+- [x] delete ticket
+- [x] delete release
 - [ ] rebase ticket
 - [ ] rebase release
 - [ ] print github/trac links
+- [ ] tag release

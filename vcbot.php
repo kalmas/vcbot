@@ -36,6 +36,34 @@ switch($argv[1]){
 			die($e->getMessage());
 		}
 		break;
+	// deleteTicket frms ticket_1234
+	case 'deleteTicket':
+	case 'deleteticket':
+	case 'dt':
+	case 'deletebranch':
+	case 'db':
+		$wsName = strtolower($argv[2]);
+		$ticketName = $argv[3];
+	
+		try{
+			$bot->getWorkspace($wsName)->deleteTicket($ticketName);
+		}catch(Exception $e){
+			die($e->getMessage());
+		}
+		break;
+	// deleteRelease frms Sep0813
+	case 'deleteRelease':
+	case 'deleterelease':
+	case 'dr':
+		$wsName = strtolower($argv[2]);
+		$releaseName = $argv[3];
+	
+		try{
+			$bot->getWorkspace($wsName)->deleteRelease($releaseName);
+		}catch(Exception $e){
+			die($e->getMessage());
+		}
+		break;
 	// mergeUp ticket_1234 Sep0813
 	case 'mergeUp':
 	case 'mergeup':
