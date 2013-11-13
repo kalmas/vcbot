@@ -76,6 +76,9 @@ switch($argv[1]){
 		}
 		
 		try{
+			if(empty($ticket) || empty($release)) {
+				throw new Exception('Missing argument.');
+			}
 			$bot->mergeUp($ticket, $release, $workspace);
 		}catch(Exception $e){
 			die($e->getMessage());
