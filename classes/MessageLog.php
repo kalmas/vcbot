@@ -25,6 +25,21 @@ class MessageLog{
 	}
 
 	/**
+	 * Print message and wait for user confirmation
+	 * @param string $message
+	 * @return boolean
+	 */
+	public function prompt($message){
+		$this->write("{$message}\nEnter 'y' to continue, any other key to skip: ");
+		$handle = fopen ("php://stdin","r");
+		$line = fgets($handle);
+		if(trim($line) == 'y') {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Write this message
 	 * @param array|string $message
 	 * @param string $type
