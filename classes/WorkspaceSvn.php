@@ -302,5 +302,63 @@ class WorkspaceSvn extends Workspace implements IRepositoryRepo {
 		}
 		return '';
 	}
+	
+	/**
+	 * Return workspace change log
+	 * @param int $limit = 50
+	 * @return string
+	 */
+	public function getWorkspaceChangeLog($limit = 50, $stopOnCopy = true) {
+		$cmd = "svn log -l {$limit} --xml";
+		if($stopOnCopy) {
+			$cmd .= " --stop-on-copy";
+		} 
+		$cmd .= " {$this->directoryPath} {$this->cmdAppend}";
+		$success = $this->commandClient->execute($cmd);
+
+		$string = '';
+		if($success){
+			$response = $this->commandClient->getLastResponse();
+			foreach($response as $line){
+				$string .= $line . "\n";
+			}
+		}
+		return $string;
+	}
+	
+	/**
+	 * Return most recent commit messages
+	 * @param number $limit
+	 * @param boolean $stopOnCopy
+	 * @return array
+	 */
+	public function getWorkspaceCommitMessages($limit = 50, $stopOnCopy = true) {
+		$changeLog = $this->getWorkspaceChangeLog($limit, $stopOnCopy);
+		print $changeLog;
+		$objectifiedChangeLog = new SimpleXMLElement($changeLog);
+		$messages = array();
+		if($objectifiedChangeLog) {
+			foreach($objectifiedChangeLog as $log){
+				$messages[] = (string)$log->msg;
+			}
+		}
+		return $messages;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see IRepositoryRepo::getMergedTickets()
+	 */
+	public function getMergedTickets(){
+		$messages = $this->getWorkspaceCommitMessages();
+		$tickets = array();
+		foreach($messages as $msg){
+			if(preg_match('/ticket_\d+\w?/', $msg, $matches) === 1) {
+				$tickets[] = $matches[0];
+			}
+		}
+		
+		return array_unique($tickets);
+	}
 
 }

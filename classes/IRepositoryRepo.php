@@ -67,5 +67,9 @@ interface IRepositoryRepo {
 	 * @return string 
 	 */
 	public function getCurrentBranch();
+	/**
+	 * @return array
+	 */
+	public function getMergedTickets();
 
 }
