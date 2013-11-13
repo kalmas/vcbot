@@ -84,6 +84,18 @@ switch($argv[1]){
 			die($e->getMessage());
 		}
 		break;
+	case 'rebase':
+		$release = $argv[2];
+		$workspace = $argv[3];
+		try {
+			if(empty($release) || empty($workspace)) {
+				throw new Exception('Missing argument.');
+			}
+			$bot->rebaseRelease($release, $workspace);
+		} catch(Exception $e) {
+			die($e->getMessage());
+		}
+		break;
 }
 
 

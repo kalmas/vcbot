@@ -443,4 +443,44 @@ class WorkspaceSvnTest extends PHPUnit_Framework_TestCase{
 		$this->assertTrue($ws->detectConflict($conflicted));
 	}
 	
+	public function test_getMergedTickets(){
+		$client = $this->getMock('CommandClient', array('execute', 'getLastResponse'));
+		$client->expects($this->at(0))
+			->method('execute')
+			->with("svn log -l 50 --xml --stop-on-copy ~/test  2>&1")
+			->will($this->returnValue(true));
+		$logReturn = array('<?xml version="1.0"?>'
+						, '<log>'
+							, '<logentry revision="46257">'
+								, '<author>kalmas</author>'
+								, '<date>2013-11-11T22:48:35.313693Z</date>'
+								, '<msg>merging ticket_1234 into release</msg>'
+							, '</logentry>'
+							, '<logentry revision="46256">'
+								, '<author>kalmas</author>'
+								, '<date>2013-11-11T22:48:35.313693Z</date>'
+								, '<msg>merging ticket_2345 into release</msg>'
+							, '</logentry>'
+							, '<logentry revision="46255">'
+								, '<author>kalmas</author>'
+								, '<date>2013-11-11T22:48:35.313693Z</date>'
+								, '<msg>merging ticket_2345 into release</msg>'
+							, '</logentry>'
+							, '<logentry revision="46254">'
+								, '<author>kalmas</author>'
+								, '<date>2013-11-11T22:48:35.313693Z</date>'
+								, '<msg>merging ticket_3456 into release</msg>'
+							, '</logentry>'
+						, '</log>'
+				);
+		$client->expects($this->at(1))
+			->method('getLastResponse')
+			->will($this->returnValue($logReturn));
+		$log = $this->getMock('MessageLog');
+		$ws = new WorkspaceSvn('http://svn.example.com/vcbot', '~/test', $log, $client);
+		
+		$mergedTickets = $ws->getMergedTickets();
+		$this->assertEquals(array(0 => 'ticket_1234', 1 => 'ticket_2345', 3 => 'ticket_3456'), $mergedTickets);
+	}
+	
 }

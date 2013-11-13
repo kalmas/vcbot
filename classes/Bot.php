@@ -2,6 +2,10 @@
  
 class Bot{
 	
+	/**
+	 * @var MessageLog
+	 */
+	private $messageLog = null;
 	private $workspaces = array();
 	
 	/**
@@ -10,13 +14,13 @@ class Bot{
 	public function __construct($config = null){
 		$configObj = json_decode($config);
 		
-		$messageLog = new MessageLog();
-		$commandClient = new CommandClient($messageLog);		
+		$this->messageLog = new MessageLog();
+		$commandClient = new CommandClient($this->messageLog);		
 		
 		foreach($configObj->workspaces as $wsConfig){
 			$workspace = new WorkspaceSvn($wsConfig->url
 					, $wsConfig->directoryPath
-					, $messageLog
+					, $this->messageLog
 					, $commandClient
 					, false
 					, $wsConfig->ticketBase
@@ -93,6 +97,44 @@ class Bot{
 			// Preform merge
 			$ws->mergeTicket($ticket);
 		}
+	}
+	
+	/**
+	 * Creates a new release branch from trunk, remerges all ticket branches
+	 * @param string $releaseName
+	 * @param string $workspaceName
+	 * @throws Exception
+	 * @return void
+	 */
+	public function rebaseRelease($releaseName, $workspaceName) {
+		$ws = $this->getWorkspace($workspaceName);
+		
+		// Get a list of tickets to merge
+		if(!$ws->switchToRelease($releaseName)) {
+			throw new Exception("Couldn't switch {$workspaceName} workspace to release {$releaseName}.");
+		}
+		$mergedTickets = $ws->getMergedTickets();
+		if(empty($mergedTickets)) {
+			throw new Exception("Couldn't find any tickets merged into {$releaseName}");
+		}
+		
+		// Switch to a temp branch
+		$tempReleaseName = $releaseName . '_tmp' . time();
+		$ws->createRelease($tempReleaseName);
+		if(!$ws->switchToRelease($tempReleaseName)) {
+			throw new Exception("Couldn't switch {$workspaceName} workspace to release {$tempReleaseName}.");
+		}
+		
+		foreach($mergedTickets as $ticket) {
+			if($this->messageLog->prompt("Merge {$ticket} into new {$releaseName}?")) {
+				$this->mergeUp($ticket, $tempReleaseName, $workspaceName);
+			} else {
+				$this->messageLog("Skipping {$ticket}.");
+			}
+		}
+		
+		$ws->moveRelease($releaseName, $releaseName . '_old' . time());
+		$ws->moveRelease($tempReleaseName, $releaseName);		
 	}
 	
 	
