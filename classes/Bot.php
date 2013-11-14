@@ -109,7 +109,7 @@ class Bot{
 	public function rebaseRelease($releaseName, $workspaceName) {
 		$ws = $this->getWorkspace($workspaceName);
 		
-		// Get a list of tickets to merge
+		// Make a list of tickets to merge
 		if(!$ws->switchToRelease($releaseName)) {
 			throw new Exception("Couldn't switch {$workspaceName} workspace to release {$releaseName}.");
 		}
@@ -118,23 +118,22 @@ class Bot{
 			throw new Exception("Couldn't find any tickets merged into {$releaseName}");
 		}
 		
-		// Switch to a temp branch
-		$tempReleaseName = $releaseName . '_tmp' . time();
-		$ws->createRelease($tempReleaseName);
-		if(!$ws->switchToRelease($tempReleaseName)) {
-			throw new Exception("Couldn't switch {$workspaceName} workspace to release {$tempReleaseName}.");
+		// Backup old release branch
+		$ws->moveRelease($releaseName, $releaseName . '_old' . time());
+		
+		// Switch to new release branch
+		$ws->createRelease($releaseName);
+		if(!$ws->switchToRelease($releaseName)) {
+			throw new Exception("Couldn't switch {$workspaceName} workspace to release {$releaseName}.");
 		}
 		
 		foreach($mergedTickets as $ticket) {
 			if($this->messageLog->prompt("Merge {$ticket} into new {$releaseName}?")) {
-				$this->mergeUp($ticket, $tempReleaseName, $workspaceName);
+				$this->mergeUp($ticket, $releaseName, $workspaceName);
 			} else {
 				$this->messageLog("Skipping {$ticket}.");
 			}
-		}
-		
-		$ws->moveRelease($releaseName, $releaseName . '_old' . time());
-		$ws->moveRelease($tempReleaseName, $releaseName);		
+		}	
 	}
 	
 	

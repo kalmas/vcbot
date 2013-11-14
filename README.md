@@ -30,6 +30,12 @@ Just a php script to help with version control busywork.
 	# Merge ticket branch into release branch for one specific workspace
 	vcbot mergeUp ticket_1234 Sep1316 frc
 *aliases: mergeup, mup*
+###rebase
+	# vcbot rebase <release> <repo>
+	# Make a new release branch from trunk and remerge all ticket branches
+	# Will prompt for confirmation for each ticket before trying merge
+	vcbot rebase Nov1813 frms
+
 ##Installation
 * You'll need php cli...
 * Clone this project to where you want it to live (we'll call it [VCBOT_DIR])
@@ -70,6 +76,6 @@ Just a php script to help with version control busywork.
 - [x] delete ticket
 - [x] delete release
 - [ ] rebase ticket
-- [ ] rebase release
+- [x] rebase release
 - [ ] print github/trac links
 - [ ] tag release
