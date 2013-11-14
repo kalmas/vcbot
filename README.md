@@ -34,6 +34,7 @@ Just a php script to help with version control busywork.
 	# vcbot rebase <release> <repo>
 	# Make a new release branch from trunk and remerge all ticket branches
 	# Will prompt for confirmation for each ticket before trying merge
+	# Backs up old release to <release>_old<timestamp>
 	vcbot rebase Nov1813 frms
 
 ##Installation
